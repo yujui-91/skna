@@ -1,0 +1,15 @@
+multirocket_dunwei ---> 跑Multirocket裡的Transform和logistic，但只會運用到transform，特徵數量總共49728個
+
+multirocket_dunwei_v1 ---> 僅跑Multirocket裡的Transform，特徵數量總共49728個
+
+multirocket_logistic_dunwei ---> 跑Multirocket裡面的logistic，有將transform刪除，只留下logistic的部分，可以更改logistic_regression裡面的參數，要控制Train和Test個別數量
+單純訊號取23位健康人5位病人當作Test(不重複)，其餘當作Train，做leave one out
+
+multirocket_logistic_dunwei_v1 ---> 跑Multirocket裡面的logistic，有將transform刪除，只留下logistic的部分，可以更改logistic_regression裡面的參數，要控制Train和Test個別數量
+訊號合併表格取4位健康人1位病人當作Test(不重複)，其餘當作Train，做leave one out (訊號和表格合併的logistic作法)
+
+multirocket_logistic_dunwei_v2 ---> 類似於multirocket_logistic_dunwei_v1，區別在於前76次前改成取5位健康人1位病人當作Test，剩餘13次取4位健康人1位病人當作Test
+
+multirocket_logistic_dunwei_v3 ---> 同一個程式，區別在於前72次前改成取5位健康人1位病人當作Test，剩餘18次取4位健康人1位病人當作Test以及input改為頻譜
+
+multirocket_logistic_dunwei_v4 ---> 每個人有不同的樣本數量，先以人為單位切割訓練和測試資料，再取出每個人的樣本數量做合併

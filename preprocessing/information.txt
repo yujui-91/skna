@@ -1,0 +1,45 @@
+MACE_research_id_transformation ---> 研究編號格式化ID為MACE001, MACE002, ..., MACE999 (V)
+
+MIDA_preprocessing　---> MIDA前處理，將feature整理出來，無缺失值當作Train，有缺失值當作Test
+
+TabPFN_pre_processing ---> 分出病人和健康人，挑出五個特徵
+
+TabPFN_preprocessing_mr ---> 多數決前處理，整理樣本數，lable和probability數量
+
+SKNA_HP ---> 分出病人和健康人的ID (V)
+
+ABF_conversion ---> .abf 檔轉換
+
+SKNA_signal_processing ---> 擷取訊號，濾波，降採樣 (single channel)，切視窗，正規化(single channel)，Ch1:SKNA-I(lead-I)、Ch2:SKNA-R(right arm) or SKNA-N(neck)，目前僅用CH1，因為CH2位置不同，無法確定是哪個位置
+
+SKNA_train_test_separate ---> 分出SKNA的訓練和測試(跑multirocket)，健康人0.8+病人0.8當作Train，健康人0.2+病人0.2當作Test (V)
+
+x_transform_HP ---> Train和Test再分H和P (V)
+
+LR_output_process ---> 1.將logistic跑完的結果作合併，再放入到多數決中，2.將logistic跑完的結果作合併，為接下來合併表格做準備
+
+LR_TabPFN_pre_process ---> logistic跑完的訊號機率和表格合併，1.TabPFN用原始的表格(沒有補缺失值)和機率合併，2.XGBoost用補完缺失值的表格和機率合併，3.透過更改路徑位置選擇是否使用缺失值的表格 (不使用)
+
+LR_TabPFN_pre_process_v1 ---> logistic跑完的訊號機率和表格合併，1.先前的有合併到train的prob，改為只合併test的prob，2.透過更改路徑位置選擇是否使用缺失值的表格
+
+signal_combine_tabular_HP ---> 再將combine data分成健康人和病人，一個人多筆資料(有包含train prob和test prob)，分成有缺失值(TabPFN)和有缺失值(XGBoost) (不使用)
+
+signal_combine_tabular_HP_v1 ---> 再將combine data分成健康人和病人，一個人一筆資料(平均)，分成有缺失值(TabPFN)和有缺失值(XGBoost) (不使用)
+
+signal_combine_tabular_HP_v2 ---> 將combine data分成健康人和病人，一個人多筆資料(僅包含test prob)，分成有缺失值(TabPFN)和有缺失值(XGBoost)
+
+TabPFN_preprocessing_mr_v1 ---> 多數決前處理，處理合併數據的樣本數、label和probability數量，平均所有人的樣本 (xgboost也適用)
+
+TabPFN_preprocessing_mr_v2 ---> 多數決前處理，處理合併數據的樣本數、label和probability數量，切割多個視窗，且每人多樣本 (xgboost也適用)
+
+ABF_time ---> 取出每個abf訊號源時間
+
+ABF_conversion ---> 取出每個訊號源ch1和ch2 (V)
+
+signal_calc_NA ---> 利用abf訊號，計算新的NA feature
+
+statistical_table ---> 原始表格，整理出H和P，計算有特徵標記和缺失值等分別有多少人(excel)
+
+tabular_preprocessing ---> 提取所需要的表格靜態特徵
+
+static_dynamic_preprocess ---> 將 static feature 和 dynamic feature 合併 (接在LR_output_process後面)

@@ -1,0 +1,21 @@
+ECG_count_R_peak ---> Non MACE 和 MACE ECG 訊號個別有多少個 R peaks，保存 Non MACE 和 MACE 處理過後的 ECG 訊號(2 min-7 min)
+
+ECG_R_peak_t_test ---> Non MACE 和 MACE 儲存的 R peak 數量個別做平均和標準差，在計算 p value
+
+ECG_plot_R_peak ---> 利用保存 Non MACE 和 MACE 處理過後的 ECG 訊號，畫出個別的 R peak figure
+
+ECG_signal_preprocess ---> Raw ECG Signal filter 0.5-50Hz, downsample 500Hz, window size 10s, 用來處理ECG Founder Model的ECG Signal 要求，不足10s不用，可以決定是否做 Zscore，
+保存 Non MACE 和 MACE 處理過後的 ECG 訊號 (N, 5000)，N 為 window num
+
+ECG_t_test ---> ECG Founder Output result (150,) / (1024, )，計算 Non MACE 和 MACE 這 150/1024 個 feature 的 p value
+
+ECG_quality ---> Non MACE 和 MACE 保存的 10 秒 ECG 訊號，做 ECG quality
+
+ECG_correlation coefficien ---> ECG Founder Output result (150,) / (1024, )，計算feature相關係數，> 0.9的數量
+
+ECG_R_peak_signal_process ---> 原本ECG Founder Model中的ECG Signal的10秒鐘不一定都有R peak，改成找出訊號的R peak，從R peak起點開始往後數 10s，當作ECG Founder Model的ECG Signal
+受試者整段訊號皆使用
+
+ECG_R_peak_signal_process_5_10min ---> 改成利用受試者 5-10 min signal，可以決定 rpeak 往後 10 sec 若超出10 min signal 要不要使用 (V)
+
+SKNA_to_aSKNA_process ---> 將原始訊號改成利用100Hz做為採樣，平做絕對值平均 (V)
