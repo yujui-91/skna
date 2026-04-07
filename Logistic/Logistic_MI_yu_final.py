@@ -66,9 +66,29 @@ def extract_advanced_features(X_raw, fs=10000):
     band_500_750 = np.mean(psd[:, (freqs >= 500) & (freqs <= 750)], axis=1)
     centroid = np.sum(psd * freqs, axis=1) / (np.sum(psd, axis=1) + 1e-10)
     
-    return np.column_stack((rms, sk, ptp, ent, pfd, hj_act, hj_mob, band_500_750, centroid))
+    # 2. Hjorth Complexity
+    # 已經有 Activity 和 Mobility，Complexity 是 Mobility 的變化率
+    d1 = np.diff(X_raw, axis=1)
+    d2 = np.diff(d1, axis=1)
+    var_raw = np.var(X_raw, axis=1)
+    var_d1 = np.var(d1, axis=1)
+    var_d2 = np.var(d2, axis=1)
 
-feature_names = ['RMS', 'Skewness', 'PTP', 'Entropy', 'PFD', 'Hjorth_Activity', 'Hjorth_Mobility', 'Band_500_750Hz', 'Centroid']
+    mob_raw = np.sqrt(var_d1 / (var_raw + 1e-10))
+    mob_d1 = np.sqrt(var_d2 / (var_d1 + 1e-10))
+    hj_complexity = mob_d1 / (mob_raw + 1e-10)
+
+    return np.column_stack((rms, sk, ptp, ent, pfd, 
+        hj_act,  hj_comp, 
+        band_500_750, centroid))
+
+feature_names = [
+    'RMS', 'Skewness', 'PTP', 'Entropy', 'PFD', 
+    'Hjorth_Activity',  'Hjorth_Complexity', 
+    'Band_500_750Hz', 'Centroid'
+]
+
+
 
 # ==========================================
 # 2. 資料載入與特徵提取
@@ -76,13 +96,14 @@ feature_names = ['RMS', 'Skewness', 'PTP', 'Entropy', 'PFD', 'Hjorth_Activity', 
 base_path = r"D:\M143020071\raw_data_result\iSKNA_signal\ch1\sr10000_500_1000_MI_1000pts_win60s_step1s"
 X_raw, y, groups = load_data_with_groups(os.path.join(base_path, "mace"), os.path.join(base_path, "non_mace"))
 X_features = extract_advanced_features(X_raw)
+# X_features = X_raw
 
 # 全域 F-Score
 f_scores, _ = f_classif(X_features, y)
 f_score_df = pd.DataFrame({'Feature': feature_names, 'F_Score': f_scores}).sort_values(by='F_Score', ascending=False)
 
 # 建立共用模型 Pipeline (自動處理標準化)
-clf = make_pipeline(StandardScaler(), LogisticRegression(penalty='l1', solver='liblinear', max_iter=1000, class_weight='balanced', C=0.01))
+clf = make_pipeline(StandardScaler(), LogisticRegression(penalty='l2', solver='lbfgs', max_iter=1000, class_weight='balanced', C=1.0))
 
 # ==========================================
 # 3. 訓練模式 A: Group-based Split (70/30)
@@ -130,3 +151,7 @@ print(pd.DataFrame({'predict\\actual': ['Positive', 'Negative'], 'Positive': [tp
 print("\n=== [4] 整體效能總結 ===")
 perf_df = pd.DataFrame({'Metric': ['Accuracy', 'Sensitivity', 'Specificity', 'MCC'], 'Split_Win': me_split_w, 'Split_Sub': me_split_s, 'LOSO_Win': me_loso_w, 'LOSO_Sub': me_loso_s})
 print(perf_df.to_string(index=False, float_format='{:.4f}'.format))
+
+save_path = os.path.join(base_path, "performance_summary.csv")
+perf_df.to_csv(save_path, index=False, encoding='utf-8-sig')
+print(f"\n[系統提示] 效能總結已成功儲存至: {save_path}")
